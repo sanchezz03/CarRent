@@ -1,0 +1,51 @@
+﻿@page "/cars"
+@using CarRent.Client.ViewModels
+@layout MainLayout
+@inject HttpClient Http
+
+<h3>Список автомобилей</h3>
+
+<div class="filter-container">
+    <label for="brand">Марка:</label>
+    <input id="brand" @bind="brand" class="filter-input" placeholder="Введите марку" />
+
+    <label for="status">Статус:</label>
+    <select id="status" @bind="status" class="filter-input">
+        <option value="">Все</option>
+        <option value="1">Доступен</option>
+        <option value="0">Занят</option>
+    </select>
+
+    <button @onclick="LoadCars" class="filter-button">Применить фильтр</button>
+</div>
+
+@if (cars is not null)
+{
+    <ul class="car-list">
+        @foreach (var car in cars)
+        {
+            <li class="car-item">@car.Brand - @car.Model - @car.PricePerDay $</li>
+        }
+    </ul>
+}
+else
+{
+    <p>Загружаем список автомобилей...</p>
+}
+
+@code {
+    private string? brand;
+    private int? status;
+    private List<CarVM>? cars;
+
+    private async Task LoadCars()
+    {
+        var url = $"api/v1/Car?Brand={brand}&Status={status}";
+        cars = await Http.GetFromJsonAsync<List<CarVM>>(url);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCars();
+    }
+}
